@@ -74,8 +74,10 @@ class COD:
 
     def remove_service_resources(self):
         updated = False
-        for resource in self.dataset.get_resources():
-            if resource.get_file_type().lower() not in ["geoservice", "json"] or "itos.uga.edu" not in resource["url"]:
+        for resource in reversed(self.dataset.get_resources()):
+            if resource.get_file_type() not in ["geoservice", "json"]:
+                continue
+            if "itos.uga.edu" not in resource["url"]:
                 continue
 
             try:

@@ -54,6 +54,7 @@ def main(**ignore):
                             hxl_update=False,
                             batch_mode="KEEP_OLD",
                             updated_by_script="HDX Scraper: CODS",
+                            remove_additional_resources=True,
                             ignore_fields=["num_of_rows", "resource:description"],
                         )
                     except HDXError as ex:

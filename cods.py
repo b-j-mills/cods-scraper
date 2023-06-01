@@ -62,7 +62,6 @@ class COD:
                     self.downloader.download(resource["url"])
                 except DownloadError:
                     do_not_continue = True
-                    self.errors.add(f"{self.iso}: Could not get data from {url}")
                     continue
 
                 resource["description"] = f"{self.country} administrative level " \

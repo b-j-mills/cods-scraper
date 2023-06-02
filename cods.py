@@ -75,7 +75,11 @@ class COD:
                     do_not_continue = True
                     continue
 
-                resource["description"] = f"{country_name} administrative level {adm} {year.get('Year')} population statistics"
+                year = year.get("Year")
+                if not year:
+                    continue
+
+                resource["description"] = f"{country_name} administrative level {adm} {year} population statistics"
                 resources.append(resource)
 
         return resources

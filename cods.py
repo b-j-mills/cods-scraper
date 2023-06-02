@@ -51,7 +51,7 @@ class COD:
 
                 try:
                     resource_desc = self.downloader.download_json(resource["url"] + "?f=pjson")
-                except DownloadError or AttributeError:
+                except DownloadError:
                     self.errors.add(f"{iso}: could not get data from {resource['download_url']}")
                     continue
 
@@ -70,12 +70,12 @@ class COD:
                 resource["format"] = "JSON"
 
                 try:
-                    year = self.downloader.download_json(resource["url"]).get("Year")
-                except DownloadError or AttributeError:
+                    year = self.downloader.download_json(resource["url"])
+                except DownloadError:
                     do_not_continue = True
                     continue
 
-                resource["description"] = f"{country_name} administrative level {adm} {year} population statistics"
+                resource["description"] = f"{country_name} administrative level {adm} {year.get('Year')} population statistics"
                 resources.append(resource)
 
         return resources

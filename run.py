@@ -21,6 +21,18 @@ def main(**ignore):
 
     with ErrorsOnExit() as errors:
         with Download(rate_limit={"calls": 1, "period": 0.1}) as downloader:
+            cod = COD(
+                downloader,
+                configuration["ab_url"],
+                configuration["em_url"],
+                configuration["ps_url"],
+                errors,
+            )
+            boundary_jsons = cod.get_boundary_jsons()
+            if len(boundary_jsons) < 2:
+                cod.errors.add("Could not get boundary service data")
+                return
+
             countries = Country.countriesdata()["countries"]
             dataset_types = ["ab", "em", "ps"]
 
@@ -31,23 +43,14 @@ def main(**ignore):
                         continue
 
                     logger.info(f"Starting to update {country} {dataset_type.upper()} dataset")
-                    cod = COD(
-                        downloader,
-                        dataset,
-                        countries[country],
-                        configuration["ab_url"],
-                        configuration["em_url"],
-                        configuration["ps_url"],
-                        errors,
-                    )
-                    service_resources = cod.get_service_resources(dataset_type)
-                    updated = cod.remove_service_resources()
+                    service_resources = cod.get_service_resources(boundary_jsons, countries[country], dataset_type)
+                    dataset, updated = cod.remove_service_resources(dataset)
 
                     if len(service_resources) == 0 and not updated:
                         continue
 
                     if len(service_resources) > 1:
-                        cod.add_service_resources(service_resources)
+                        dataset = cod.add_service_resources(dataset, service_resources)
 
                     try:
                         dataset.update_in_hdx(

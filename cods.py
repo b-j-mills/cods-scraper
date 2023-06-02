@@ -5,31 +5,44 @@ from hdx.utilities.base_downloader import DownloadError
 
 
 class COD:
-    def __init__(self, downloader, dataset, country, ab_url, em_url, ps_url, errors):
-        self.dataset = dataset
-        self.iso = country["#country+code+v_iso3"]
-        self.country = country["#country+name+preferred"]
+    def __init__(self, downloader, ab_url, em_url, ps_url, errors):
         self.downloader = downloader
-        self.errors = errors
         self.service_urls = {
             "ab": ab_url,
             "em": em_url,
             "ps": ps_url,
         }
+        self.errors = errors
 
-    def get_service_resources(self, cod_type):
+    def get_boundary_jsons(self):
+        boundary_jsons = dict()
+        for cod_type in ["ab", "em"]:
+            url = self.service_urls.get(cod_type)
+            try:
+                service_json = self.downloader.download_json(url + "?f=pjson")
+            except DownloadError:
+                self.errors.add(f"Could not get data from {url}")
+                return boundary_jsons
+
+            boundary_jsons[cod_type] = service_json
+
+        return boundary_jsons
+
+    def get_service_resources(self, boundary_jsons, country, cod_type):
+        iso = country["#country+code+v_iso3"]
+        country_name = country["#country+name+preferred"]
         resources = list()
         url = self.service_urls.get(cod_type)
 
         if cod_type in ["ab", "em"]:
-            try:
-                service_list = self.downloader.download_json(url + "?f=pjson").get("services")
-            except DownloadError or AttributeError:
-                self.errors.add(f"{self.iso}: Could not get data from {url}")
+            service_list = boundary_jsons[cod_type].get("services")
+            if not service_list:
+                self.errors.add(f"{iso}: could not find service list")
+                return resources
 
             for service in service_list:
                 resource = dict()
-                if service["name"].split("/")[1][:3].upper() != self.iso:
+                if service["name"].split("/")[1][:3].upper() != iso:
                     continue
 
                 resource["url"] = url + "/" + service["name"].split("/")[1] + "/" + service["type"]
@@ -39,7 +52,7 @@ class COD:
                 try:
                     resource["description"] = self.downloader.download_json(resource["url"] + "?f=pjson").get("serviceDescription")
                 except DownloadError or AttributeError:
-                    self.errors.add(f"{self.iso}: could not get data from {resource['download_url']}")
+                    self.errors.add(f"{iso}: could not get data from {resource['download_url']}")
                     continue
 
                 resources.append(resource)
@@ -51,8 +64,8 @@ class COD:
                 if do_not_continue:
                     continue
 
-                resource["url"] = url.replace("/iso", f"/{self.iso}").replace("/adm/", f"/{adm}/")
-                resource["name"] = f"{self.iso.upper()} admin {adm} population"
+                resource["url"] = url.replace("/iso", f"/{iso}").replace("/adm/", f"/{adm}/")
+                resource["name"] = f"{iso.upper()} admin {adm} population"
                 resource["format"] = "JSON"
 
                 try:
@@ -61,30 +74,33 @@ class COD:
                     do_not_continue = True
                     continue
 
-                resource["description"] = f"{self.country} administrative level {adm} {year} population statistics"
+                resource["description"] = f"{country_name} administrative level {adm} {year} population statistics"
 
                 resources.append(resource)
 
         return resources
 
-    def remove_service_resources(self):
+    def remove_service_resources(self, dataset):
         updated = False
-        for resource in reversed(self.dataset.get_resources()):
+        for resource in reversed(dataset.get_resources()):
             if resource.get_file_type() not in ["geoservice", "json"]:
                 continue
             if "itos.uga.edu" not in resource["url"]:
                 continue
 
             try:
-                self.dataset.delete_resource(resource, delete=False)
+                dataset.delete_resource(resource, delete=False)
             except HDXError:
-                self.errors.add(f"{self.dataset['name']}: Could not delete service resource")
+                self.errors.add(f"{dataset['name']}: Could not delete service resource")
                 continue
 
             updated = True
 
-        return updated
+        return dataset, updated
 
-    def add_service_resources(self, resources):
-        self.dataset.add_update_resources(resources)
-        return
+    def add_service_resources(self, dataset, resources):
+        try:
+            dataset = dataset.add_update_resources(resources)
+        except HDXError:
+            self.errors.add(f"{dataset['name']}: Could not add service resource")
+        return dataset

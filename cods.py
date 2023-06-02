@@ -23,11 +23,10 @@ class COD:
 
         if cod_type in ["ab", "em"]:
             try:
-                self.downloader.download(url + "?f=pjson")
-            except DownloadError:
+                service_list = self.downloader.download_json(url + "?f=pjson").get("services")
+            except DownloadError or AttributeError:
                 self.errors.add(f"{self.iso}: Could not get data from {url}")
 
-            service_list = self.downloader.get_json()["services"]
             for service in service_list:
                 resource = dict()
                 if service["name"].split("/")[1][:3].upper() != self.iso:
@@ -38,12 +37,10 @@ class COD:
                 resource["format"] = "Geoservice"
 
                 try:
-                    self.downloader.download(resource["url"] + "?f=pjson")
-                except DownloadError:
+                    resource["description"] = self.downloader.download_json(resource["url"] + "?f=pjson").get("serviceDescription")
+                except DownloadError or AttributeError:
                     self.errors.add(f"{self.iso}: could not get data from {resource['download_url']}")
                     continue
-
-                resource["description"] = self.downloader.get_json()["serviceDescription"]
 
                 resources.append(resource)
 
@@ -59,13 +56,12 @@ class COD:
                 resource["format"] = "JSON"
 
                 try:
-                    self.downloader.download(resource["url"])
-                except DownloadError:
+                    year = self.downloader.download_json(resource["url"]).get("Year")
+                except DownloadError or AttributeError:
                     do_not_continue = True
                     continue
 
-                resource["description"] = f"{self.country} administrative level " \
-                                          f"{adm} {self.downloader.get_json()['Year']} population statistics"
+                resource["description"] = f"{self.country} administrative level {adm} {year} population statistics"
 
                 resources.append(resource)
 

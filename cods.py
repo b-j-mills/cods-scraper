@@ -50,11 +50,12 @@ class COD:
                 resource["format"] = "Geoservice"
 
                 try:
-                    resource["description"] = self.downloader.download_json(resource["url"] + "?f=pjson").get("serviceDescription")
+                    resource_desc = self.downloader.download_json(resource["url"] + "?f=pjson")
                 except DownloadError or AttributeError:
                     self.errors.add(f"{iso}: could not get data from {resource['download_url']}")
                     continue
 
+                resource["description"] = resource_desc.get("serviceDescription")
                 resources.append(resource)
 
         if cod_type == "ps":
@@ -75,7 +76,6 @@ class COD:
                     continue
 
                 resource["description"] = f"{country_name} administrative level {adm} {year} population statistics"
-
                 resources.append(resource)
 
         return resources
@@ -100,7 +100,9 @@ class COD:
 
     def add_service_resources(self, dataset, resources):
         try:
-            dataset = dataset.add_update_resources(resources)
+            dataset.add_update_resources(resources)
         except HDXError:
             self.errors.add(f"{dataset['name']}: Could not add service resource")
+            return None
+
         return dataset

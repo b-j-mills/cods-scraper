@@ -52,6 +52,9 @@ def main(**ignore):
                     if len(service_resources) > 1:
                         dataset = cod.add_service_resources(dataset, service_resources)
 
+                    if not dataset:
+                        continue
+
                     try:
                         dataset.update_in_hdx(
                             hxl_update=False,

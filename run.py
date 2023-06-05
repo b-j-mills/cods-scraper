@@ -34,7 +34,6 @@ def main(**ignore):
                 return
 
             countries = Country.countriesdata()["countries"]
-            countries = {"POL": countries["POL"]}
             dataset_types = ["ab", "em", "ps"]
 
             for country in countries:

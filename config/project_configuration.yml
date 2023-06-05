@@ -1,5 +1,5 @@
-ab_url: "https://gistmaps.itos.uga.edu/arcgis/rest/services/COD_External"
+ab_url: "https://codgis.itos.uga.edu/arcgis/rest/services/COD_External"
 
-em_url: "https://gistmaps.itos.uga.edu/arcgis/rest/services/COD_External_Edgematch"
+em_url: "https://codgis.itos.uga.edu/arcgis/rest/services/COD_External_Edgematch"
 
 ps_url: "https://apps.itos.uga.edu/CODV2API/api/v1/themes/cod-ps/lookup/Get/adm/do/iso"

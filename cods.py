@@ -1,5 +1,3 @@
-import logging
-
 from hdx.data.hdxobject import HDXError
 from hdx.utilities.base_downloader import DownloadError
 

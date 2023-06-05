@@ -21,7 +21,7 @@ class TestCOD:
         "em": data,
     }
     service_resources_em = [
-        {'url': 'https://gistmaps.itos.uga.edu/arcgis/rest/services/COD_External_Edgematch/POL_PL_Edgematch/MapServer',
+        {'url': 'https://codgis.itos.uga.edu/arcgis/rest/services/COD_External_Edgematch/POL_PL_Edgematch/MapServer',
          'name': 'COD_External_Edgematch/POL_PL_Edgematch (MapServer)',
          'format': 'Geoservice',
          'description': 'This map service contains an edgematched version of OCHA Common Operational Datasets for Poland: Administrative Boundaries. The service is available as ESRI Map, ESRI Feature, WMS, and KML Services. See the OCHA COD/FOD terms of use for access and use constraints.'},

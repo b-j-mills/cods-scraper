@@ -42,9 +42,3 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         flag-name: tests
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v2
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        junit_files: junit/*.xml

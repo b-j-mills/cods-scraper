@@ -38,7 +38,12 @@ def main(**ignore):
 
             for country in countries:
                 for dataset_type in dataset_types:
-                    dataset = Dataset.read_from_hdx(f"cod-{dataset_type}-{country.lower()}")
+                    try:
+                        dataset = Dataset.read_from_hdx(f"cod-{dataset_type}-{country.lower()}")
+                    except HDXError:
+                        logger.error(f"Could not read cod-{dataset_type}-{country.lower()}")
+                        continue
+
                     if not dataset:
                         continue
 

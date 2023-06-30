@@ -21,7 +21,7 @@ class TestCOD:
         "em": data,
     }
     service_resources_em = [
-        {'url': 'https://codgis.itos.uga.edu/arcgis/rest/services/COD_External_Edgematch/POL_PL_Edgematch/MapServer',
+        {'url': 'https://gistmaps.itos.uga.edu/arcgis/rest/services/COD_External_Edgematch/POL_PL_Edgematch/MapServer',
          'name': 'COD_External_Edgematch/POL_PL_Edgematch (MapServer)',
          'format': 'Geoservice',
          'description': 'This map service contains an edgematched version of OCHA Common Operational Datasets for Poland: Administrative Boundaries. The service is available as ESRI Map, ESRI Feature, WMS, and KML Services. See the OCHA COD/FOD terms of use for access and use constraints.'},
@@ -77,44 +77,22 @@ class TestCOD:
         )
         return cod
 
-    def test_get_service_resources_em(self, downloader, configuration):
-        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
-        service_resources = cod.get_service_resources(self.boundary_jsons, self.country, "em")
-        assert service_resources == self.service_resources_em
-
-    def test_get_service_resources_ps(self, downloader, configuration):
-        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
-        service_resources = cod.get_service_resources(self.boundary_jsons, self.country, "ps")
-        assert service_resources == self.service_resources_ps
-
-    def test_remove_service_resources_em(self, downloader, configuration):
-        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
+    def test_em(self, downloader, configuration):
         indataset = Dataset.load_from_json(join("tests", "fixtures", "cod-em-pol.json"))
-        outdataset = Dataset.load_from_json(join("tests", "fixtures", "cod-em-pol_remove_resources.json"))
-        dataset, updated = cod.remove_service_resources(indataset)
-        assert updated is True
-        assert dataset.get_resources() == outdataset.get_resources()
-
-    def test_remove_service_resources_ps(self, downloader, configuration):
-        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
-        indataset = Dataset.load_from_json(join("tests", "fixtures", "cod-ps-pol.json"))
-        outdataset = Dataset.load_from_json(join("tests", "fixtures", "cod-ps-pol_remove_resources.json"))
-        dataset, updated = cod.remove_service_resources(indataset)
-        assert updated is False
-        assert dataset.get_resources() == outdataset.get_resources()
-
-    def test_add_service_resources_em(self, downloader, configuration):
-        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
-        indataset = Dataset.load_from_json(join("tests", "fixtures", "cod-em-pol_remove_resources.json"))
         outdataset = Dataset.load_from_json(join("tests", "fixtures", "cod-em-pol_add_resources.json"))
+        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
         service_resources = cod.get_service_resources(self.boundary_jsons, self.country, "em")
-        dataset = cod.add_service_resources(indataset, service_resources)
+        dataset, updated = cod.remove_service_resources(indataset)
+        dataset = cod.add_service_resources(dataset, service_resources)
+        assert service_resources == self.service_resources_em
         assert dataset.get_resources() == outdataset.get_resources()
 
-    def test_add_service_resources_ps(self, downloader, configuration):
-        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
-        indataset = Dataset.load_from_json(join("tests", "fixtures", "cod-ps-pol_remove_resources.json"))
+    def test_ps(self, downloader, configuration):
+        indataset = Dataset.load_from_json(join("tests", "fixtures", "cod-ps-pol.json"))
         outdataset = Dataset.load_from_json(join("tests", "fixtures", "cod-ps-pol_add_resources.json"))
+        cod = COD(downloader, configuration["ab_url"], configuration["em_url"], configuration["ps_url"], ErrorsOnExit())
         service_resources = cod.get_service_resources(self.boundary_jsons, self.country, "ps")
-        dataset = cod.add_service_resources(indataset, service_resources)
+        dataset, updated = cod.remove_service_resources(indataset)
+        dataset = cod.add_service_resources(dataset, service_resources)
+        assert service_resources == self.service_resources_ps
         assert dataset.get_resources() == outdataset.get_resources()

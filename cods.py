@@ -92,6 +92,7 @@ class COD:
             if resource.get_file_type() not in ["geoservice", "json"]:
                 continue
             if "itos.uga.edu" not in resource["url"]:
+                self.errors.add(f"{dataset['name']}: Has service resource {resource['url']}")
                 continue
 
             try:

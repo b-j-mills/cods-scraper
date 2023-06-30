@@ -73,6 +73,10 @@ class COD:
                     do_not_continue = True
                     continue
 
+                if len(year) == 1 and year[0].get("status"):
+                    do_not_continue = True
+                    continue
+
                 year = year.get("Year")
                 if not year:
                     continue

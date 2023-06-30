@@ -49,7 +49,7 @@ def main(**ignore):
                     if len(service_resources) == 0 and not updated:
                         continue
 
-                    if len(service_resources) > 1:
+                    if len(service_resources) > 0:
                         dataset = cod.add_service_resources(dataset, service_resources)
 
                     if not dataset:
